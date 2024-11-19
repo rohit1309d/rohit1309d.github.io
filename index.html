@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precise Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            text-align: center;
+        }
+        .timer-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        #timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .timer-display-part {
+            text-align: center;
+        }
+        .timer-display-part:not(:last-child)::after {
+            content: ':';
+            margin-left: 0.5rem;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        #start-pause {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #reset {
+            background-color: #2196F3;
+            color: white;
+        }
+        #instructions {
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .milliseconds {
+            font-size: 2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container">
+        <h1>Timer</h1>
+        <div id="timer-display">
+            <div id="minutes" class="timer-display-part">00</div>
+            <div id="seconds" class="timer-display-part">00</div>
+            <div id="milliseconds" class="timer-display-part">000</div>
+        </div>
+        <div class="controls">
+            <button id="start-pause">Start</button>
+            <button id="reset">Reset</button>
+        </div>
+        <div id="instructions">
+            Press SPACE to reset and restart timer
+        </div>
+    </div>
+
+    <script>
+        // Timer variables
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+
+        // DOM Elements
+        const minutesDisplay = document.getElementById('minutes');
+        const secondsDisplay = document.getElementById('seconds');
+        const millisecondsDisplay = document.getElementById('milliseconds');
+        const startPauseBtn = document.getElementById('start-pause');
+        const resetBtn = document.getElementById('reset');
+
+        // Format time 
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((milliseconds % 1000));
+            
+            const paddedMinutes = minutes.toString().padStart(2, '0');
+            const paddedSeconds = seconds.toString().padStart(2, '0');
+            const paddedMs = ms.toString().padStart(3, '0');
+
+            return {
+                minutes: paddedMinutes,
+                seconds: paddedSeconds,
+                ms: paddedMs
+            };
+        }
+
+        // Update Timer Display
+        function updateDisplay() {
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+            
+            const { minutes, seconds, ms } = formatTime(elapsedTime);
+            minutesDisplay.textContent = minutes;
+            secondsDisplay.textContent = seconds;
+            millisecondsDisplay.textContent = `${ms}`;
+        }
+
+        // Start/Pause Timer
+        function toggleTimer() {
+            if (isRunning) {
+                // Pause
+                clearInterval(timerInterval);
+                startPauseBtn.textContent = 'Start';
+                startPauseBtn.style.backgroundColor = '#4CAF50';
+                isRunning = false;
+            } else {
+                // Start
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(updateDisplay, 10);
+                startPauseBtn.textContent = 'Pause';
+                startPauseBtn.style.backgroundColor = '#FFC107';
+                isRunning = true;
+            }
+        }
+
+        // Reset Timer
+        function resetTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            minutesDisplay.textContent = '00';
+            secondsDisplay.textContent = '00';
+            millisecondsDisplay.textContent = '000';
+            isRunning = false;
+            startPauseBtn.textContent = 'Start';
+            startPauseBtn.style.backgroundColor = '#4CAF50';
+        }
+
+        // Event Listeners
+        startPauseBtn.addEventListener('click', toggleTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // Spacebar Event
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // Prevent scrolling
+                resetTimer();
+                toggleTimer();
+            }
+        });
+    </script>
+</body>
+</html>
