@@ -11,13 +11,19 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             background-color: #f0f4f8;
             text-align: center;
+            margin: 0;
+            cursor: pointer;
         }
         .timer-container {
             background-color: white;
@@ -26,6 +32,12 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 500px;
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .timer-container * {
+            pointer-events: auto;
         }
         #timer-display {
             font-size: 4rem;
@@ -89,7 +101,7 @@
             <button id="reset">Reset</button>
         </div>
         <div id="instructions">
-            Press SPACE to reset and restart timer
+            Click anywhere to reset and restart timer
         </div>
     </div>
 
@@ -101,11 +113,13 @@
         let isRunning = false;
 
         // DOM Elements
+        const timerContainer = document.querySelector('.timer-container');
         const minutesDisplay = document.getElementById('minutes');
         const secondsDisplay = document.getElementById('seconds');
         const millisecondsDisplay = document.getElementById('milliseconds');
         const startPauseBtn = document.getElementById('start-pause');
         const resetBtn = document.getElementById('reset');
+        const instructionsText = document.getElementById('instructions');
 
         // Format time 
         function formatTime(milliseconds) {
@@ -143,6 +157,7 @@
                 clearInterval(timerInterval);
                 startPauseBtn.textContent = 'Start';
                 startPauseBtn.style.backgroundColor = '#4CAF50';
+                instructionsText.textContent = 'Click outside to reset and restart timer';
                 isRunning = false;
             } else {
                 // Start
@@ -150,6 +165,7 @@
                 timerInterval = setInterval(updateDisplay, 10);
                 startPauseBtn.textContent = 'Pause';
                 startPauseBtn.style.backgroundColor = '#FFC107';
+                instructionsText.textContent = 'Timer is running';
                 isRunning = true;
             }
         }
@@ -164,11 +180,21 @@
             isRunning = false;
             startPauseBtn.textContent = 'Start';
             startPauseBtn.style.backgroundColor = '#4CAF50';
+            instructionsText.textContent = 'Click anywhere to reset and restart timer';
         }
 
-        // Event Listeners
+        // Event Listeners for Buttons
         startPauseBtn.addEventListener('click', toggleTimer);
         resetBtn.addEventListener('click', resetTimer);
+
+        // Click Anywhere to Reset and Restart
+        document.body.addEventListener('click', (e) => {
+            // Check if click is outside the timer container
+            if (!timerContainer.contains(e.target)) {
+                resetTimer();
+                toggleTimer();
+            }
+        });
 
         // Spacebar Event
         document.addEventListener('keydown', (e) => {
